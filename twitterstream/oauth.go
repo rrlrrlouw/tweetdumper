@@ -150,8 +150,8 @@ func (o *OAuthClient) GetRequestToken(callback string) *RequestToken {
 
 	confirmed, _ := strconv.ParseBool(tokens["oauth_callback_confirmed"][0])
 	rt := RequestToken{
-		OAuthTokenSecret:       tokens["oauth_token_secret"][0],
-		OAuthToken:             tokens["oauth_token"][0],
+		OAuthTokenSecret:       "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g",//tokens["oauth_token_secret"][0],
+		OAuthToken:             "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme",//tokens["oauth_token"][0],
 		OAuthCallbackConfirmed: confirmed,
 	}
 	return &rt
@@ -200,8 +200,8 @@ func (o *OAuthClient) GetAccessToken(requestToken *RequestToken, OAuthVerifier s
 	}
 
 	at := AccessToken{
-		OAuthTokenSecret: tokens["oauth_token_secret"][0],
-		OAuthToken:       tokens["oauth_token"][0],
+		OAuthTokenSecret: "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g"//tokens["oauth_token_secret"][0],
+		OAuthToken:       "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme"//tokens["oauth_token"][0],
 		UserId:           tokens["user_id"][0],
 		ScreenName:       tokens["screen_name"][0],
 	}
