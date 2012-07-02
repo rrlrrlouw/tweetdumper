@@ -7,32 +7,44 @@ import (
     "os"
     "io"
     "bufio"
+    "flag"
 )
 var (
-        path string = "/home/student/data"
-        extension string = ".json"
-    )
+    length *int = flag.Int("l", 10, "number of tweets to dump")
+    help *bool = flag.Bool("h", false, "helpfile")
+    counter int = 0
+)
 
 func main() {
-    stream()
+    flag.Parse()
+    if *help{
+        helpfile()
+    } else if flag.Arg(0) != "" && flag.Arg(1) != ""{
+        stream()
+    } else {
+        fmt.Println("Invalid Use. Use -h for help")
+    }
+
     //jsonDecode()
     //oldJsonDecode()
 }
 
+func helpfile(){
+    fmt.Println("\n -h   : helpfile")
+    fmt.Println(" -l=i : A total of i tweets will be dumped (default = 10)")
+    fmt.Println("You Need to enter a valid twitter account's username and password")
+    fmt.Println("example: main.go -l=100 Username PaSsWoRd\n")
+}
 func stream() {
     stream := make(chan *twitterstream.Tweet)
-    for {
-        username, password := input()
-        client := twitterstream.NewClient(username, password)
-        err := client.Sample(stream)
-        if err != nil {
-            fmt.Println(err)
-        } else {
-            break
-        }
+    client := twitterstream.NewClient(flag.Arg(0), flag.Arg(1))
+    err := client.Sample(stream)
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
     }
 
-    for {
+    for counter < *length{
         tw := <-stream
         if tw.Coordinates.Coordinates  != nil {
            jsonDump(tw)
@@ -40,26 +52,17 @@ func stream() {
     }
 }
 
-func input() (username string, password string) {
-    //fmt.Println("Enter username for twitter account")
-    fmt.Scan(&username)
-    //fmt.Println("Enter password for twiiter account")
-    fmt.Scan(&password)
-    return
-}
-
 func jsonDump(tw *twitterstream.Tweet) {
     btw, err := json.Marshal(tw)
     if err == nil {
         writeLines(os.Stdout, btw)
-        //fmt.Println("DUMP : ", dumpCounter)
     }
 }
 
 func writeLines(w io.Writer, b []byte) (err error) {
     _, err = w.Write(b)
-
     _, err = w.Write([]byte(fmt.Sprint("\n")))
+    counter += 1
     if err != nil {
         fmt.Println(err)
     }
@@ -73,16 +76,14 @@ func oldJsonDecode() {
     data = data[:i]
     var tweet []twitterstream.Tweet
     json.Unmarshal(data, &tweet)
-
     fmt.Println(tweet[7543].Text, len(tweet))
 }
 
 func jsonDecode() {
-    f, _ := os.Open("/home/student/yay.json")
+    f, _ := os.Open("/home/student/sdata.json")
     r := bufio.NewReader(f)
     var tweet twitterstream.Tweet
     tweets := make([]twitterstream.Tweet, 1, 100000)
-
     line, isPrefix, err := r.ReadLine()
     for err == nil && !isPrefix {
         json.Unmarshal(line, &tweet)
@@ -90,5 +91,6 @@ func jsonDecode() {
         tweets = tweets[:len(tweets)+1]
         line, isPrefix, err = r.ReadLine()
     }
-    fmt.Println(tweets[17].Text)
+    tweets = tweets[:len(tweets)-1]
+    fmt.Println(tweets[10].Text)
 }
