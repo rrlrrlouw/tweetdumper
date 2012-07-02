@@ -1,0 +1,20 @@
+package main
+
+import "twitterstream"
+import "time"
+
+func main() {
+    stream := make(chan *twitterstream.Tweet)
+    client := twitterstream.NewClient("RamsayLouw", "Bob3833")
+    err := client.Sample(stream)
+    if err != nil {
+        println(err)
+    }
+    for {
+	time.Sleep(1 * time.Millisecond)
+        tw := <-stream
+	if tw.User.Geo_enabled{
+	        println(tw.User.Screen_name, ": ", tw.Geo)
+	}
+    }
+}
