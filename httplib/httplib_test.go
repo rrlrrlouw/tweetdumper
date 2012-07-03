@@ -1,15 +1,15 @@
 package httplib
 
 import (
-    "testing"
+	"testing"
 )
 
 func TestFluidGet(t *testing.T) {
-    query, err := Get("www.google.com/search").AsString()
-    if err != nil {
-        println(err.Error())
-    }
-    println(query)
+	query, err := Get("www.google.com/search").AsString()
+	if err != nil {
+		println(err.Error())
+	}
+	println(query)
 
 }
 

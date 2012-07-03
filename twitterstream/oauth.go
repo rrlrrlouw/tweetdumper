@@ -1,6 +1,7 @@
 package twitterstream
 
 import (
+	"TweetTracer/httplib"
 	"bufio"
 	"bytes"
 	"crypto/hmac"
@@ -9,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"TweetTracer/httplib"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -79,25 +79,25 @@ func signatureBase(httpMethod string, base_uri string, params map[string]string)
 	buf.WriteString("&")
 
 	//var keys vector.StringVector
-    var keys []string
-    for k, _ := range params {
-        //keys.Push(k)
-	keys = append(keys, k)
-    }
+	var keys []string
+	for k, _ := range params {
+		//keys.Push(k)
+		keys = append(keys, k)
+	}
 
-    sort.Strings(keys)
-    for i, k := range keys {
-        v := params[k]
-        buf.WriteString(URLEscape(k))
-        buf.WriteString("%3D")
-        buf.WriteString(URLEscape(v))
-        //don't include the dangling %26
-        if i < len(params)-1 {
-            buf.WriteString("%26")
-        }
-        i++
-    }
-    return buf.String()
+	sort.Strings(keys)
+	for i, k := range keys {
+		v := params[k]
+		buf.WriteString(URLEscape(k))
+		buf.WriteString("%3D")
+		buf.WriteString(URLEscape(v))
+		//don't include the dangling %26
+		if i < len(params)-1 {
+			buf.WriteString("%26")
+		}
+		i++
+	}
+	return buf.String()
 }
 
 func signRequest(base string, consumerSecret string, tokenSecret string) string {
@@ -150,8 +150,8 @@ func (o *OAuthClient) GetRequestToken(callback string) *RequestToken {
 
 	confirmed, _ := strconv.ParseBool(tokens["oauth_callback_confirmed"][0])
 	rt := RequestToken{
-		OAuthTokenSecret:       "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g",//tokens["oauth_token_secret"][0],
-		OAuthToken:             "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme",//tokens["oauth_token"][0],
+		OAuthTokenSecret:       "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g",        //tokens["oauth_token_secret"][0],
+		OAuthToken:             "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme", //tokens["oauth_token"][0],
 		OAuthCallbackConfirmed: confirmed,
 	}
 	return &rt
@@ -200,8 +200,8 @@ func (o *OAuthClient) GetAccessToken(requestToken *RequestToken, OAuthVerifier s
 	}
 
 	at := AccessToken{
-		OAuthTokenSecret: "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g"//tokens["oauth_token_secret"][0],
-		OAuthToken:       "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme"//tokens["oauth_token"][0],
+		OAuthTokenSecret: "vy9uOJOvo8doaOmzkQqdAt3AF5aYb4SkmN10r70n77g",        //tokens["oauth_token_secret"][0],
+		OAuthToken:       "620081979-kzSLKfpdDmEPfKNGQKL19Nsqb3MGf5wSA2KRrtme", //tokens["oauth_token"][0],
 		UserId:           tokens["user_id"][0],
 		ScreenName:       tokens["screen_name"][0],
 	}
