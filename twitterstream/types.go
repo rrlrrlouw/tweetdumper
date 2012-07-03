@@ -58,7 +58,7 @@ type Tweet struct {
 	In_reply_to_user_id     int64
 	Id                      int64
 	Created_at              string
-	User                    *User
+	User                    User
 	Place                   Place
 	Coordinates             Coordinates
 }

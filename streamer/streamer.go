@@ -2,39 +2,50 @@ package streamer
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
 	"tweetdumper/twitterstream"
 )
 
-var counter = 0
+var (
+	counter = 0
+	stream  = make(chan *twitterstream.Tweet)
+)
 
-func Stream(username string, password string, length *int, geo *bool, ch chan []byte) {
-	stream := make(chan *twitterstream.Tweet)
-	client := twitterstream.NewClient(username, password)
-	err := client.Sample(stream)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for counter < *length {
-		tw := <-stream
-		if *geo {
-			if tw.Coordinates.Coordinates != nil {
-				jsonDump(tw, ch)
-			}
-		} else {
-			jsonDump(tw, ch)
-		}
-	}
-	close(ch)
+func Stream(username string, password string, length int, geo bool, ch chan []byte) {
+	connect(username, password)
+	read(length, geo, ch)
 }
 
-func jsonDump(tw *twitterstream.Tweet, ch chan []byte) {
+func connect(username string, password string) error {
+	client := twitterstream.NewClient(username, password)
+	return client.Sample(stream)
+}
+
+func read(length int, geo bool, ch chan []byte) error {
+	defer close(ch)
+	for counter < length {
+		tw := <-stream
+		if geo {
+			if tw.Coordinates.Coordinates != nil {
+				err := jsonDump(tw, ch)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			err := jsonDump(tw, ch)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func jsonDump(tw *twitterstream.Tweet, ch chan []byte) error {
 	btw, err := json.Marshal(tw)
 	if err == nil {
 		ch <- btw
 		counter += 1
 	}
+	return err
 }

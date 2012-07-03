@@ -9,16 +9,21 @@ import (
 )
 
 var (
-	length      *int  = flag.Int("l", 10, "number of tweets to dump")
-	help        *bool = flag.Bool("h", false, "helpfile")
-	geo         *bool = flag.Bool("g", false, "only dump tweets with coordinate values")
-	counter     int   = 0
-	writestream       = make(chan []byte)
+	length      int
+	help        bool
+	geo         bool
+	counter     int = 0
+	writestream     = make(chan []byte)
 )
 
+func init() {
+	flag.IntVar(&length, "l", 10, "number of tweets to dump")
+	flag.BoolVar(&help, "h", false, "helpfile")
+	flag.BoolVar(&geo, "g", false, "only dump tweets with coordinate values")
+}
 func main() {
 	flag.Parse()
-	if *help {
+	if help {
 		helpfile()
 	} else if flag.Arg(0) != "" && flag.Arg(1) != "" {
 		execute()
@@ -41,8 +46,7 @@ func execute() {
 }
 
 func writeLines(w io.Writer) (err error) {
-	for _ = range writestream {
-		b := <-writestream
+	for b := range writestream {
 		_, err = w.Write(b)
 		_, err = w.Write([]byte(fmt.Sprint("\n")))
 		if err != nil {
