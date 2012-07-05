@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"tweetdumper/streamer"
 )
@@ -12,7 +11,6 @@ var (
 	length      int
 	help        bool
 	geo         bool
-	writestream     = make(chan []byte)
 )
 
 func init() {
@@ -30,17 +28,5 @@ func main() {
 }
 
 func execute() {
-	go streamer.Stream(flag.Arg(0), flag.Arg(1), length, geo, writestream)
-	writeLines(os.Stdout)
-}
-
-func writeLines(w io.Writer) (err error) {
-	for b := range writestream {
-		_, err = w.Write(b)
-		_, err = w.Write([]byte(fmt.Sprint("\n")))
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-	return
+	streamer.Stream(flag.Arg(0), flag.Arg(1), length, geo, os.Stdout)
 }

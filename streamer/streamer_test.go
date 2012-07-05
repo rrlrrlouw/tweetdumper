@@ -4,103 +4,123 @@ import (
 	"encoding/json"
 	"testing"
 	"tweetdumper/twitterstream"
+	"os"
+	"bufio"
 )
 
 func TestRead(t *testing.T) {
-	ch := make(chan []byte)
-	tw := new(twitterstream.Tweet)
+	stream  := make(chan *twitterstream.Tweet)
 	num := 4
 	geo := false
+	f, err := os.Create("/home/student/test.json")
+	if err != nil {
+		t.Errorf("Can not create test file")
+	} else {
 
-	go read(num, geo, ch)
-	testtweet1 := new(twitterstream.Tweet)
-	testtweet1.Retweet_count = 99
-	testtweet1.User.Lang = "TestLang"
-	testtweet1.Place.Country = "TestCountry"
-	testtweet1.Coordinates.Coordinates = []float64{23.22, 28.44}
-	stream <- testtweet1
+		go read(num, geo, stream, f)
+		
+		testtweet1 := twitterstream.Tweet {
+			Retweet_count:  99,
+			User: twitterstream.User {Lang: "TestLang",},
+			Place: twitterstream.Place {Country: "TestCountry",},
+			Coordinates: twitterstream.Coordinates {Coordinates: []float64{23.22, 28.44},},
+		}
+		stream <- &testtweet1
 
-	data := <-ch
-	json.Unmarshal(data, &tw)
-	if tw.Retweet_count != 99 {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.User.Lang != "TestLang" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Place.Country != "TestCountry" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Coordinates.Coordinates[0] != 23.22 {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Coordinates.Coordinates[1] != 28.44 {
-		t.Errorf("Not returning same data as was sent")
-	}
+		testtweet2 := twitterstream.Tweet{
+			Text: "This is a test",
+			User: twitterstream.User {Verified: false,},
+			Place: twitterstream.Place {Country_code: "TestCountry_code",},
+			Coordinates: twitterstream.Coordinates {Type: "TestType",},
+		}
+		stream <- &testtweet2
 
-	testtweet2 := new(twitterstream.Tweet)
-	testtweet2.Text = "This is a test"
-	testtweet2.User.Verified = false
-	testtweet2.Place.Country_code = "TestCountry_code"
-	testtweet2.Coordinates.Type = "TestType"
-	stream <- testtweet2
+		testtweet3 := twitterstream.Tweet{
+			Truncated: true,
+			User: twitterstream.User {Followers_count: 88,},
+			Place: twitterstream.Place {Full_name: "TestFull_name",},
+			In_reply_to_screen_name: "TestIn_reply_to_screen_name",
+		}
+		stream <- &testtweet3
 
-	data = <-ch
-	json.Unmarshal(data, &tw)
-	if tw.Text != "This is a test" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.User.Verified != false {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Place.Country_code != "TestCountry_code" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Coordinates.Type != "TestType" {
-		t.Errorf("Not returning same data as was sent")
-	}
+		testtweet4 := twitterstream.Tweet{
+			Favorited: true,
+			User: twitterstream.User {Location: "TestLocation",},
+			Place: twitterstream.Place {Id: "TestId",},
+			Source: "TestSource",
+		}
+		stream <- &testtweet4
 
-	testtweet3 := new(twitterstream.Tweet)
-	testtweet3.Truncated = true
-	testtweet3.User.Followers_count = 88
-	testtweet3.Place.Full_name = "TestFull_name"
-	testtweet3.In_reply_to_screen_name = "TestIn_reply_to_screen_name"
-	stream <- testtweet3
+		f, _ := os.Open("/home/student/test.json")
+		r := bufio.NewReader(f)
+		var tweet twitterstream.Tweet
+		tweets := make([]twitterstream.Tweet, 1, 100000)
+		line, isPrefix, err := r.ReadLine()
+		for err == nil && !isPrefix {
+			json.Unmarshal(line, &tweet)
+			tweets[len(tweets)-1] = tweet
+			tweets = tweets[:len(tweets)+1]
+			line, isPrefix, err = r.ReadLine()
+		}
+		tweets = tweets[:len(tweets)-1]
+		if len(tweets) != 4{
+			t.Errorf("The same number of data was not return")
+		}
 
-	data = <-ch
-	json.Unmarshal(data, &tw)
-	if tw.Truncated != true {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.User.Followers_count != 88 {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Place.Full_name != "TestFull_name" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.In_reply_to_screen_name != "TestIn_reply_to_screen_name" {
-		t.Errorf("Not returning same data as was sent")
-	}
+		if tweets[0].Retweet_count != 99 {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[0].User.Lang != "TestLang" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[0].Place.Country != "TestCountry" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[0].Coordinates.Coordinates[0] != 23.22 {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[0].Coordinates.Coordinates[1] != 28.44 {
+			t.Errorf("Not returning same data as was sent")
+		}
 
-	testtweet4 := new(twitterstream.Tweet)
-	testtweet4.Favorited = true
-	testtweet4.User.Location = "TestLocation"
-	testtweet4.Place.Id = "TestId"
-	testtweet4.Source = "TestSource"
-	stream <- testtweet4
+		if tweets[1].Text != "This is a test" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[1].User.Verified != false {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[1].Place.Country_code != "TestCountry_code" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[1].Coordinates.Type != "TestType" {
+			t.Errorf("Not returning same data as was sent")
+		}
 
-	data = <-ch
-	json.Unmarshal(data, &tw)
-	if tw.Favorited != true {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.User.Location != "TestLocation" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Place.Id != "TestId" {
-		t.Errorf("Not returning same data as was sent")
-	}
-	if tw.Source != "TestSource" {
-		t.Errorf("Not returning same data as was sent")
+		if tweets[2].Truncated != true {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[2].User.Followers_count != 88 {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[2].Place.Full_name != "TestFull_name" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[2].In_reply_to_screen_name != "TestIn_reply_to_screen_name" {
+			t.Errorf("Not returning same data as was sent")
+		}
+
+
+		if tweets[3].Favorited != true {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[3].User.Location != "TestLocation" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[3].Place.Id != "TestId" {
+			t.Errorf("Not returning same data as was sent")
+		}
+		if tweets[3].Source != "TestSource" {
+			t.Errorf("Not returning same data as was sent")
+		}
 	}
 }
