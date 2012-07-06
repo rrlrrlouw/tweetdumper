@@ -12,7 +12,6 @@ func TestRead(t *testing.T) {
 	geo := false
 
 	reader, writer := io.Pipe()
-	tweets := make([]twitterstream.Tweet, 0, 100)
 	go read(num, geo, stream, writer)
 
 	testtweet1 := twitterstream.Tweet{
@@ -47,7 +46,12 @@ func TestRead(t *testing.T) {
 	}
 	stream <- &testtweet4
 
-	tweets = jsonRead(reader)
+	tr := NewTweetReader(4, reader)
+	tr.jsonRead()
+	tr.jsonRead()
+	tr.jsonRead()
+	tr.jsonRead()
+	tweets := tr.tweets
 
 	if tweets[0].Retweet_count != 99 {
 		t.Errorf("Not returning same data as was sent")
