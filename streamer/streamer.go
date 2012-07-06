@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"errors"
 	"tweetdumper/twitterstream"
 )
 
@@ -68,21 +69,22 @@ func jsonDump(tw *twitterstream.Tweet, counter int, w io.Writer) (int, error) {
 
 type TweetReader struct {
 	bufr   *bufio.Reader
-	tweets []twitterstream.Tweet
 }
 
-func NewTweetReader(num int, r io.Reader) *TweetReader {
+func NewTweetReader(r io.Reader) *TweetReader {
 	return &TweetReader{
 		bufr:   bufio.NewReader(r),
-		tweets: make([]twitterstream.Tweet, 0, num),
 	}
 }
 
-func (tr *TweetReader) jsonRead() {
-	var tweet twitterstream.Tweet
+func (tr *TweetReader) jsonRead() (tweet twitterstream.Tweet, err error) {
 	line, isPrefix, err := tr.bufr.ReadLine()
-	if err == nil && !isPrefix {
-		json.Unmarshal(line, &tweet)
+	if err != nil {
+		return tweet, err
 	}
-	tr.tweets = append(tr.tweets, tweet)
+	if isPrefix {
+		return tweet, errors.New("tweet is a Prefix")
+	}
+	json.Unmarshal(line, &tweet)
+	return tweet, err
 }
