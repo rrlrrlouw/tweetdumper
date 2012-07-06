@@ -48,9 +48,7 @@ func TestRead(t *testing.T) {
 
 	tr := NewTweetReader(reader)
 
-	
-
-	tw, err := tr.jsonRead()
+	tw, err := tr.JsonRead()
 	if err != nil {
 		if tw.Retweet_count != 99 {
 			t.Errorf("Not returning same data as was sent")
@@ -69,8 +67,7 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-
-	tw, _ = tr.jsonRead()
+	tw, _ = tr.JsonRead()
 	if err != nil {
 		if tw.Text != "This is a test" {
 			t.Errorf("Not returning same data as was sent")
@@ -86,7 +83,7 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	tw, err = tr.jsonRead()
+	tw, err = tr.JsonRead()
 	if err != nil {
 		if tw.Truncated != true {
 			t.Errorf("Not returning same data as was sent")
@@ -102,7 +99,7 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	tw, err = tr.jsonRead()
+	tw, err = tr.JsonRead()
 	if err != nil {
 		if tw.Favorited != true {
 			t.Errorf("Not returning same data as was sent")
@@ -119,8 +116,8 @@ func TestRead(t *testing.T) {
 	}
 	writer.Close()
 
-	tw, err = tr.jsonRead()
-	if err == nil{
+	tw, err = tr.JsonRead()
+	if err == nil {
 		t.Errorf("Error expected")
 	}
 }

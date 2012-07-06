@@ -3,10 +3,10 @@ package streamer
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
-	"errors"
 	"tweetdumper/twitterstream"
 )
 
@@ -68,16 +68,16 @@ func jsonDump(tw *twitterstream.Tweet, counter int, w io.Writer) (int, error) {
 }
 
 type TweetReader struct {
-	bufr   *bufio.Reader
+	bufr *bufio.Reader
 }
 
 func NewTweetReader(r io.Reader) *TweetReader {
 	return &TweetReader{
-		bufr:   bufio.NewReader(r),
+		bufr: bufio.NewReader(r),
 	}
 }
 
-func (tr *TweetReader) jsonRead() (tweet twitterstream.Tweet, err error) {
+func (tr *TweetReader) JsonRead() (tweet twitterstream.Tweet, err error) {
 	line, isPrefix, err := tr.bufr.ReadLine()
 	if err != nil {
 		return tweet, err
