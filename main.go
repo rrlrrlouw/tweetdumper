@@ -8,13 +8,13 @@ import (
 )
 
 var (
-	length      int
-	help        bool
-	geo         bool
+	length int
+	help   bool
+	geo    bool
 )
 
 func init() {
-	flag.IntVar(&length, "l", 10, "number of tweets to dump: default = 10: for uninterupted stream l=0")
+	flag.IntVar(&length, "l", 0, "number of tweets to dump: default = 0: for uninterupted stream l=0")
 	flag.BoolVar(&geo, "g", false, "only dump tweets with coordinate values")
 }
 
