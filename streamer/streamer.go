@@ -77,14 +77,18 @@ func NewTweetReader(r io.Reader) *TweetReader {
 	}
 }
 
-func (tr *TweetReader) JsonRead() (tweet twitterstream.Tweet, err error) {
+func (tr *TweetReader) JsonRead() (tweet *twitterstream.Tweet, err error) {
+	tweet = &twitterstream.Tweet{}
 	line, isPrefix, err := tr.bufr.ReadLine()
 	if err != nil {
-		return tweet, err
+		return nil, err
 	}
 	if isPrefix {
-		return tweet, errors.New("tweet is a Prefix")
+		return nil, errors.New("tweet is a Prefix")
 	}
-	json.Unmarshal(line, &tweet)
+	err = json.Unmarshal(line, tweet)
+	if err != nil {
+		return nil, err
+	}
 	return tweet, err
 }
